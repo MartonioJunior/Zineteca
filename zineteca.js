@@ -1,5 +1,4 @@
-var allZines;
-var currentZines;
+var currentZines, detailedZine, detailedInfo, detailedDescription, detaliedCategories;
 var header;
 var appbackground;
 var credits;
@@ -7,79 +6,6 @@ var allCategories;
 var interfaceElements;
 var currentMenu;
 var highlightedCategory;
-
-class Zine {
-	constructor(id,coverImage,pdf,name,author,description) {
-		this.id = id;
-		this.coverImage = coverImage;
-		this.pdf = pdf;
-		this.name = name;
-		this.author = author;
-		this.description = description;
-		this.categories = [];
-	}
-
-	getID() {
-		return this.id;
-	}
-
-	setCoverImage(imagePath) {
-		this.coverImage = loadImage(imagePath);
-	}
-
-	getCoverImage() {
-		return this.coverImage;
-	}
-
-	setPdf(newPdf) {
-		this.pdf = newPdf;
-	}
-
-	getPdf() {
-		return this.pdf;
-	}
-
-	setName(newName) {
-		this.name = newName;
-	}
-
-	getName() {
-		return this.name;
-	}
-
-	setAuthor(newAuthor) {
-		this.author = newAuthor;
-	}
-
-	getAuthor() {
-		return this.author;
-	}
-
-	setDescription(newDescription) {
-		this.description = newDescription;
-	}
-
-	getDescription() {
-		return this.description;
-	}
-
-	addCategory(newCategory) {
-		this.categories.push(newCategory);
-	}
-
-	findCategory(categoryName) {
-		return this.categories.find(categoryName);
-	}
-
-	removeCategory(index) {
-		if (index < 0 || index >= this.categories.length)
-		this.categories.splice(index,1);
-	}
-
-	getCategory(index) {
-		return this.categories[index];
-	}
-}
 
 class AppHeader {
 	constructor() {
@@ -103,7 +29,7 @@ class AppHeader {
 		this.searchBar = createInput("Buscar...");
 		this.searchBar.position(240,8); // 240
 		this.searchBar.size(600,30);
-		this.searchBar.style("background-color","rgba(255, 255, 255, 0.3)");
+		this.searchBar.style("background-color","rgba(255, 255, 255, 0.5)");
 		this.searchBar.style("font-family","Dosis");
 		this.searchBar.style("font-size","24px");
 		this.searchBar.style("font-weight","lighter");
@@ -187,25 +113,54 @@ class InteractiveElement {
 }
 
 class InteractiveDisplay extends InteractiveElement {
-	constructor(coverImage,xPos,yPos,widthSize,heightSize) {
+	constructor(background,coverImage,xPos,yPos,widthSize,heightSize) {
 		super(xPos,yPos,widthSize,heightSize);
+		this.setBackground(background);
+		this.background.position(this.getX(),this.getY());
+		this.background.size(this.getWidth(),this.getHeight());
 		this.setCoverImage(coverImage);
-		this.coverImage.position(this.getX(),this.getY());
-		this.coverImage.size(this.getWidth(),this.getHeight());
+		this.coverImage.position(this.getX()+this.getWidth()*0.15,this.getY()+this.getHeight()*0.15);
+		this.coverImage.size(this.getWidth()*0.7,this.getHeight()*0.7);
 		this.angle = 0;
+		this.coverImage.zineID = -1;
 		this.coverImage.inside = false;
 	}
 
+	generateImage(imagePath) {
+		let elementImage = createImg(imagePath,"");
+		elementImage.style("background-position","center");
+		return elementImage;
+	}
+
+	setBackground(imagePath) {
+		this.background = this.generateImage(imagePath);
+		this.background.style("background-size",this.getWidth()+"px "+this.getHeight()+"px");
+	}
+
+	getBackground() {
+		return this.background;
+	}
+
 	setCoverImage(imagePath) {
-		this.coverImage = createImg(imagePath);
-		this.coverImage.style("background-position","center");
-		this.coverImage.style("background-size",this.getWidth()+"px "+this.getHeight()+"px");
+		this.coverImage = this.generateImage(imagePath);
 		this.coverImage.mouseOver(this.isInside);
 		this.coverImage.mouseOut(this.isOutside);
+		this.coverImage.mouseClicked(this.clicked);
+		this.coverImage.style("background-size",this.getWidth()*0.7+"px "+this.getHeight()*0.7+"px");
+		this.coverImage.style("background-position",this.getWidth()*0.15+"px "+this.getHeight()*0.15+"px");
+		this.coverImage.style("background-repeat","no-repeat");
 	}
 
 	getCoverImage() {
 		return this.coverImage;
+	}
+
+	setZineID(newID) {
+		this.coverImage.zineID = newID;
+	}
+
+	getZineID() {
+		return this.coverImage.zineID;
 	}
 
 	setAngle(newAngle) {
@@ -228,8 +183,17 @@ class InteractiveDisplay extends InteractiveElement {
 		} else {
 			return;
 		}
-		this.coverImage.size(this.getWidth()+(this.angle*1.8),this.getHeight()+(this.angle*3));
+		this.background.size(this.getWidth()+(this.angle*1.8),this.getHeight()+(this.angle*3));
+		this.background.style("rotate",-this.angle);
+		this.coverImage.size(this.getWidth()*0.7+(this.angle*1.8),this.getHeight()*0.7+(this.angle*3));
 		this.coverImage.style("rotate",-this.angle);
+	}
+
+	clicked() {
+		if (this.zineID === -1) {
+			return;
+		}
+		showInDetail(this.zineID);
 	}
 
 	isInside() {
@@ -241,10 +205,12 @@ class InteractiveDisplay extends InteractiveElement {
 	}
 
 	hide() {
+		this.background.hide();
 		this.coverImage.hide();
 	}
 
 	show() {
+		this.background.show();
 		this.coverImage.show();
 	}
 }
@@ -300,6 +266,10 @@ class InteractiveButton extends InteractiveElement {
 		}
 		this.categoryLabel.position(this.getX(),this.getY()-(this.sizeValue*3));
 		this.categoryLabel.size(this.getWidth()+(this.sizeValue*1.8),this.getHeight()+(this.sizeValue*3));
+	}
+
+	clicked() {
+		
 	}
 
 	isInside() {
@@ -370,6 +340,56 @@ function returnToMainMenu() {
 	displayMenu(currentMenu);
 }
 
+function showInDetail(index) {
+	let chosenZine = allZines[index];
+	currentMenu = 1;
+	interfaceElements[1].length = 0;
+
+	// Description Menu Rebuilding
+	let menu2 = [];
+	let descriptionBackground = new InteractiveDisplay("Assets/cardboard.png","",100,100,880,500);
+	descriptionBackground.setInactive();
+	let descriptionDivider = new InteractiveDisplay("Assets/description-separator.png","",200,310,780,80);
+	descriptionDivider.setInactive();
+	let zineDescriptionBG = new InteractiveDisplay("Assets/description-cardboard.png","",250,120,700,180);
+	zineDescriptionBG.setInactive();
+
+	detailedCategories = [];
+	for(i=0;i<5;i++) {
+		let categoryTag = new InteractiveButton("Categoria "+i,311+i*133,390,133,100,i%4);
+		categoryTag.getCategoryLabel().style("font-size","20px");
+		categoryTag.getCategoryLabel().style("background-size","180px 50px");
+		categoryTag.getCategoryLabel().style("background-position","-15px 15px");
+		categoryTag.getCategoryLabel().style("rotate","0");
+		categoryTag.getCategoryLabel().style("background-repeat","no-repeat");
+		detailedCategories.push(categoryTag);
+		menu2.push(categoryTag);
+	}
+
+	let zineBackground = new InteractiveDisplay("Assets/zine-displayer.png","",50,80,280,540);
+	zineBackground.setInactive();
+	detailedZine = new InteractiveDisplay("Assets/cover-"+index+".png","Assets/"+chosenZine.getCoverImage(),100,100,180,280);
+	detailedZine.setInactive();
+	let readButton = new InteractiveDisplay("Assets/read-button.png","",125,500,150,50);
+	detailedDescription = new InteractiveText(350,100,600,180,"Descrição<span style='font-weight:lighter;font-size:16px;'><br>"+chosenZine.getDescription(),"");
+	detailedInfo = new InteractiveText(100,380,180,100,"<span style='font-weight:bolder;'>"+chosenZine.getName()+"</span><br>"+chosenZine.getAuthor(),"");
+	detailedInfo.getContent().style("font-size","20px");
+	let categoryLabel = new InteractiveText(530,305,200,40,"","Assets/categorias-cardboard.png");
+
+	menu2.push(descriptionBackground);
+	menu2.push(descriptionDivider);
+	menu2.push(detailedDescription);
+	menu2.push(zineDescriptionBG);
+	menu2.push(categoryLabel);
+	menu2.push(detailedInfo);
+	menu2.push(zineBackground);
+	menu2.push(detailedZine);
+	menu2.push(readButton);
+	interfaceElements[1] = menu2;
+	appbackground.getCoverImage().size(1080,760);
+	displayMenu(currentMenu);
+}
+
 function search() {
 	currentMenu = 3;
 	appbackground.getCoverImage().size(1080,1520);
@@ -379,18 +399,20 @@ function search() {
 function setup() {
 	angleMode(DEGREES);
 
-	allZines = [];
 	allCategories = [];
 	currentZines = [];
 	interfaceElements = [];
 
-	appbackground = new InteractiveDisplay("Assets/background-app.png",0,0,1080,1720);
-	appbackground.getCoverImage().style("margin-top","0px");
+	appbackground = new InteractiveDisplay("Assets/background-app.png","",0,0,1080,1720);
+	appbackground.getBackground().style("margin-top","0px");
+	appbackground.getCoverImage().position(0,0);
 
 	// Main Menu
 	let menu1 = [];
-	for(i=0;i<8;i++) {
-		menu1.push(new InteractiveDisplay("Assets/cover-"+(i%6)+".png",100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280));
+	for(i=0;i<allZines.length;i++) {
+		let zineDisplay = new InteractiveDisplay("Assets/cover-"+i%6+".png","Assets/"+allZines[i].getCoverImage(),100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280);
+		zineDisplay.setZineID(i);
+		menu1.push(zineDisplay);
 	}
 	for(i=0;i<6;i++) {
 		menu1.push(new InteractiveButton("Nome da Categoria",-50,900+i*100,650,200,i%4));
@@ -401,47 +423,11 @@ function setup() {
 
 	// Description Menu
 	let menu2 = [];
-	let descriptionBackground = new InteractiveDisplay("Assets/cardboard.png",100,100,880,500);
-	descriptionBackground.setInactive();
-	let descriptionDivider = new InteractiveDisplay("Assets/description-separator.png",200,310,780,80);
-	descriptionDivider.setInactive();
-	let zineDescriptionBG = new InteractiveDisplay("Assets/description-cardboard.png",250,120,700,180);
-	zineDescriptionBG.setInactive();
-
-	for(i=0;i<5;i++) {
-		let categoryTag = new InteractiveButton("Categoria "+i,311+i*133,390,133,100,i%4);
-		categoryTag.getCategoryLabel().style("font-size","20px");
-		categoryTag.getCategoryLabel().style("background-size","180px 50px");
-		categoryTag.getCategoryLabel().style("background-position","-15px 15px");
-		categoryTag.getCategoryLabel().style("rotate","0");
-		categoryTag.getCategoryLabel().style("background-repeat","no-repeat");
-		menu2.push(categoryTag);
-	}
-
-	let zineBackground = new InteractiveDisplay("Assets/zine-displayer.png",50,80,280,540);
-	zineBackground.setInactive();
-	let zine = new InteractiveDisplay("Assets/cover-4.png",100,100,180,280);
-	zine.setInactive();
-	let readButton = new InteractiveDisplay("Assets/read-button.png",125,500,150,50);
-	let zineDescription = new InteractiveText(350,100,600,180,"Descrição<span style='font-weight:lighter;font-size:16px;'><br>Esta zine é dedicada a falar sobre as coisas simples da vida, contando histórias reais de pessoas que mudaram de vida por causa de algo que parecia ser irrelevante.","");
-	let zineInfo = new InteractiveText(100,380,180,100,"<span style='font-weight:bolder;'>All Things Ordinary</span><br>Mark C. Lane","");
-	zineInfo.getContent().style("font-size","20px")
-	let categoryLabel = new InteractiveText(530,305,200,40,"","Assets/categorias-cardboard.png");
-
-	menu2.push(descriptionBackground);
-	menu2.push(descriptionDivider);
-	menu2.push(zineDescription);
-	menu2.push(zineDescriptionBG);
-	menu2.push(categoryLabel);
-	menu2.push(zineInfo);
-	menu2.push(zineBackground);
-	menu2.push(zine);
-	menu2.push(readButton);
 
 	// Category Menu
 	let menu3 = [];
 	for(i=0;i<16;i++) {
-		menu3.push(new InteractiveDisplay("Assets/cover-"+(i%6)+".png",100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280));
+		menu3.push(new InteractiveDisplay("Assets/cover-"+(i%6)+".png","",100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280));
 	}
 	let bigCategoryLabel = new InteractiveText(340,75,400,80,"","Assets/categorias-grey.png");
 	menu3.push(bigCategoryLabel);
@@ -449,7 +435,7 @@ function setup() {
 	// Search Menu
 	let menu4 = [];
 	for(i=0;i<16;i++) {
-		menu4.push(new InteractiveDisplay("Assets/cover-"+(i%6)+".png",100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280));
+		menu4.push(new InteractiveDisplay("Assets/cover-"+(i%6)+".png","",100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280));
 	}
 	let searchResultsLabel = new InteractiveText(340,75,400,80,"","Assets/categorias-cardboard.png");
 	menu4.push(searchResultsLabel);
