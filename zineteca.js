@@ -85,24 +85,38 @@ class AppHeader {
 	constructor() {
 		this.overlay = createP("");
 		this.overlay.position(0,0);
-		this.overlay.size(1080,50);
-		this.overlay.style("background-color","#BA007C");
+		this.overlay.size(1080,70);
+		this.overlay.style("background-image","url('Assets/header-app.png')");
+		this.overlay.style("background-size","1500px 100px");
+		this.overlay.style("background-position","-100px -30px");
+		//this.overlay.style("background-color","#BA007C");
 		this.overlay.style("margin-top","0px");
-		this.button = createButton("");
-		this.button.position(0,0);
-		this.button.size(170,50);
-		this.button.style("background-image","url('Assets/logo.png')");
-		this.button.style("background-size","167px 50px");
-		this.button.style("background-position","center");
-		this.button.style("background-color","#BA007C");
-		this.button.style("border","0px");
-		this.button.mouseClicked(returnToMainMenu);
+		this.logoButton = createButton("");
+		this.logoButton.position(0,0);
+		this.logoButton.size(170,50);
+		this.logoButton.style("background-image","url('Assets/logo.png')");
+		this.logoButton.style("background-size","167px 50px");
+		this.logoButton.style("background-position","center");
+		this.logoButton.style("background-color","rgba(0, 0, 0, 0)");
+		this.logoButton.style("border","0px");
+		this.logoButton.mouseClicked(returnToMainMenu);
 		this.searchBar = createInput("Buscar...");
-		this.searchBar.position(300,5);
+		this.searchBar.position(240,8); // 240
 		this.searchBar.size(600,30);
+		this.searchBar.style("background-color","rgba(255, 255, 255, 0.3)");
 		this.searchBar.style("font-family","Dosis");
 		this.searchBar.style("font-size","24px");
 		this.searchBar.style("font-weight","lighter");
+		this.searchBar.style("border","0px");
+		this.searchButton = createButton("");
+		this.searchButton.position(810,13);
+		this.searchButton.size(20,20);
+		this.searchButton.style("background-image","url('Assets/search icon.png')");
+		this.searchButton.style("background-size","20px 20px");
+		//this.searchButton.style("background-position","center");
+		this.searchButton.style("background-color","rgba(0, 0, 0, 0)");
+		this.searchButton.style("border","0px");
+		this.searchButton.mouseClicked(search);
 	}
 }
 
@@ -352,6 +366,13 @@ function displayMenu(menu) {
 
 function returnToMainMenu() {
 	currentMenu = 0;
+	appbackground.getCoverImage().size(1080,1720);
+	displayMenu(currentMenu);
+}
+
+function search() {
+	currentMenu = 3;
+	appbackground.getCoverImage().size(1080,1520);
 	displayMenu(currentMenu);
 }
 
@@ -366,12 +387,10 @@ function setup() {
 	appbackground = new InteractiveDisplay("Assets/background-app.png",0,0,1080,1720);
 	appbackground.getCoverImage().style("margin-top","0px");
 
-	currentMenu = 1;
-
+	// Main Menu
 	let menu1 = [];
-
 	for(i=0;i<8;i++) {
-		menu1.push(new InteractiveDisplay("Assets/cover-"+(i%6)+".png",100+200*(i%4),200-100*(i%2)+300*int(i/4),180,280));
+		menu1.push(new InteractiveDisplay("Assets/cover-"+(i%6)+".png",100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280));
 	}
 	for(i=0;i<6;i++) {
 		menu1.push(new InteractiveButton("Nome da Categoria",-50,900+i*100,650,200,i%4));
@@ -380,8 +399,8 @@ function setup() {
 	credits.getContent().style("text-align","center");
 	menu1.push(credits);
 
+	// Description Menu
 	let menu2 = [];
-
 	let descriptionBackground = new InteractiveDisplay("Assets/cardboard.png",100,100,880,500);
 	descriptionBackground.setInactive();
 	let descriptionDivider = new InteractiveDisplay("Assets/description-separator.png",200,310,780,80);
@@ -419,15 +438,28 @@ function setup() {
 	menu2.push(zine);
 	menu2.push(readButton);
 
+	// Category Menu
 	let menu3 = [];
+	for(i=0;i<16;i++) {
+		menu3.push(new InteractiveDisplay("Assets/cover-"+(i%6)+".png",100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280));
+	}
+	let bigCategoryLabel = new InteractiveText(340,75,400,80,"","Assets/categorias-grey.png");
+	menu3.push(bigCategoryLabel);
+
+	// Search Menu
 	let menu4 = [];
+	for(i=0;i<16;i++) {
+		menu4.push(new InteractiveDisplay("Assets/cover-"+(i%6)+".png",100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280));
+	}
+	let searchResultsLabel = new InteractiveText(340,75,400,80,"","Assets/categorias-cardboard.png");
+	menu4.push(searchResultsLabel);
 
 	interfaceElements.push(menu1);
 	interfaceElements.push(menu2);
 	interfaceElements.push(menu3);
 	interfaceElements.push(menu4);
 
-	displayMenu(currentMenu);
+	returnToMainMenu();
 
 	header = new AppHeader();
 }
