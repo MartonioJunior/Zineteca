@@ -183,9 +183,9 @@ class InteractiveDisplay extends InteractiveElement {
 		} else {
 			return;
 		}
-		this.background.size(this.getWidth()+(this.angle*1.8),this.getHeight()+(this.angle*3));
+		this.background.size(this.getWidth()+(this.angle*this.getWidth()*0.01),this.getHeight()+(this.angle*this.getHeight()*0.01));
 		this.background.style("rotate",-this.angle);
-		this.coverImage.size(this.getWidth()*0.7+(this.angle*1.8),this.getHeight()*0.7+(this.angle*3));
+		this.coverImage.size(this.getWidth()*0.7+(this.angle*this.getWidth()*0.01),this.getHeight()*0.7+(this.angle*this.getHeight()*0.01));
 		this.coverImage.style("rotate",-this.angle);
 	}
 
@@ -265,7 +265,7 @@ class InteractiveButton extends InteractiveElement {
 			return;
 		}
 		this.categoryLabel.position(this.getX(),this.getY()-(this.sizeValue*3));
-		this.categoryLabel.size(this.getWidth()+(this.sizeValue*1.8),this.getHeight()+(this.sizeValue*3));
+		this.categoryLabel.size(this.getWidth()+(this.sizeValue*0.003*this.getWidth()),this.getHeight()+(this.sizeValue*0.02*this.getHeight())); //650,200
 	}
 
 	clicked() {
@@ -355,11 +355,11 @@ function showInDetail(index) {
 	zineDescriptionBG.setInactive();
 
 	detailedCategories = [];
-	for(i=0;i<5;i++) {
-		let categoryTag = new InteractiveButton("Categoria "+i,311+i*133,390,133,100,i%4);
+	for(i=0;i<chosenZine.getAllCategories().length;i++) {
+		let categoryTag = new InteractiveButton(chosenZine.getCategory(i),291+(i%3)*220,390+80*int(i/3),220,70,i%4);
 		categoryTag.getCategoryLabel().style("font-size","20px");
-		categoryTag.getCategoryLabel().style("background-size","180px 50px");
-		categoryTag.getCategoryLabel().style("background-position","-15px 15px");
+		categoryTag.getCategoryLabel().style("background-size","220px 50px");
+		categoryTag.getCategoryLabel().style("background-position","0px 15px");
 		categoryTag.getCategoryLabel().style("rotate","0");
 		categoryTag.getCategoryLabel().style("background-repeat","no-repeat");
 		detailedCategories.push(categoryTag);
@@ -370,8 +370,9 @@ function showInDetail(index) {
 	zineBackground.setInactive();
 	detailedZine = new InteractiveDisplay("Assets/cover-"+index+".png","Assets/"+chosenZine.getCoverImage(),100,100,180,280);
 	detailedZine.setInactive();
-	let readButton = new InteractiveDisplay("Assets/read-button.png","",125,500,150,50);
-	detailedDescription = new InteractiveText(350,100,600,180,"Descrição<span style='font-weight:lighter;font-size:16px;'><br>"+chosenZine.getDescription(),"");
+	let readButton = new InteractiveDisplay("Assets/button.png","Assets/read-button.png",125,500,150,60);
+	readButton.getCoverImage().mouseClicked(readZine);
+	detailedDescription = new InteractiveText(350,100,600,180,"<span style='font-weight:bolder;'>Descrição</span><span style='font-size:16px;'><br>"+chosenZine.getDescription(),"");
 	detailedInfo = new InteractiveText(100,380,180,100,"<span style='font-weight:bolder;'>"+chosenZine.getName()+"</span><br>"+chosenZine.getAuthor(),"");
 	detailedInfo.getContent().style("font-size","20px");
 	let categoryLabel = new InteractiveText(530,305,200,40,"","Assets/categorias-cardboard.png");
@@ -396,11 +397,28 @@ function search() {
 	displayMenu(currentMenu);
 }
 
+function readZine() {
+	currentMenu = 4;
+	appbackground.getCoverImage().size(1080,760);
+	displayMenu(currentMenu);
+}
+
 function setup() {
 	angleMode(DEGREES);
 
 	allCategories = [];
+	for (var i = allZines.length - 1; i >= 0; i--) {
+		let categories = allZines[i].getAllCategories()
+		for (var j = categories.length - 1; j >= 0; j--) {
+			let found = allCategories.includes(categories[j]);
+			if (!found) {
+				allCategories.push(categories[j]);
+			}
+		}
+	}
+
 	currentZines = [];
+
 	interfaceElements = [];
 
 	appbackground = new InteractiveDisplay("Assets/background-app.png","",0,0,1080,1720);
@@ -409,13 +427,17 @@ function setup() {
 
 	// Main Menu
 	let menu1 = [];
+	let popularLabel = new InteractiveText(240,80,600,60,"<span style='font-weight:medium;font-size:48px;'>MAIS POPULARES</span>","");
+	popularLabel.getContent().style("text-align","center");
+	popularLabel.getContent().style("font-family","Rudiment");
+	menu1.push(popularLabel);
 	for(i=0;i<allZines.length;i++) {
 		let zineDisplay = new InteractiveDisplay("Assets/cover-"+i%6+".png","Assets/"+allZines[i].getCoverImage(),100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280);
 		zineDisplay.setZineID(i);
 		menu1.push(zineDisplay);
 	}
-	for(i=0;i<6;i++) {
-		menu1.push(new InteractiveButton("Nome da Categoria",-50,900+i*100,650,200,i%4));
+	for(i=0;i<min(allCategories.length,6);i++) {
+		menu1.push(new InteractiveButton(allCategories[i],-50,900+i*100,650,200,i%4));
 	}
 	let credits = new InteractiveText(520,900,560,800,"<br><br><span style='font-weight:bolder;font-size:30px;'>Créditos</span><br>Equipe Art Lab","Assets/credits-app.png");
 	credits.getContent().style("text-align","center");
@@ -440,12 +462,17 @@ function setup() {
 	let searchResultsLabel = new InteractiveText(340,75,400,80,"","Assets/categorias-cardboard.png");
 	menu4.push(searchResultsLabel);
 
+	// Read Menu (Leitor)
+	let menu5 = []; /* TENTA COLOCAR OS ELEMENTOS NESSE ARRAY, SE POSSÍVEL */
+
 	interfaceElements.push(menu1);
 	interfaceElements.push(menu2);
 	interfaceElements.push(menu3);
 	interfaceElements.push(menu4);
+	interfaceElements.push(menu5);
 
-	returnToMainMenu();
+	//returnToMainMenu();
+	readZine(0);
 
 	header = new AppHeader();
 }
