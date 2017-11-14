@@ -26,7 +26,8 @@ class AppHeader {
 		this.logoButton.style("background-color","rgba(0, 0, 0, 0)");
 		this.logoButton.style("border","0px");
 		this.logoButton.mouseClicked(returnToMainMenu);
-		this.searchBar = createInput("Buscar...");
+		this.searchBar = createInput();
+		this.searchBar.attribute("placeholder","Buscar...");
 		this.searchBar.position(240,8); // 240
 		this.searchBar.size(600,30);
 		this.searchBar.style("background-color","rgba(255, 255, 255, 0.5)");
@@ -221,6 +222,7 @@ class InteractiveButton extends InteractiveElement {
 		this.setCategoryLabel(categoryName, index);
 		this.sizeValue = 0;
 		this.categoryLabel.inside = false;
+		this.categoryLabel.text = categoryName;
 	}
 
 	setCategoryLabel(text, index) {
@@ -229,6 +231,7 @@ class InteractiveButton extends InteractiveElement {
 		this.categoryLabel.size(this.width,this.height);
 		this.categoryLabel.mouseOver(this.isInside);
 		this.categoryLabel.mouseOut(this.isOutside);
+		this.categoryLabel.mouseClicked(this.clicked);
 		this.categoryLabel.style("text-transform","uppercase");
 		this.categoryLabel.style("text-align","center");
 		this.categoryLabel.style("font-family","Dosis");
@@ -269,7 +272,7 @@ class InteractiveButton extends InteractiveElement {
 	}
 
 	clicked() {
-		
+		showCategory(this.text);
 	}
 
 	isInside() {
@@ -368,7 +371,7 @@ function showInDetail(index) {
 
 	let zineBackground = new InteractiveDisplay("Assets/zine-displayer.png","",50,80,280,540);
 	zineBackground.setInactive();
-	detailedZine = new InteractiveDisplay("Assets/cover-"+index+".png","Assets/"+chosenZine.getCoverImage(),100,100,180,280);
+	detailedZine = new InteractiveDisplay("Assets/cover-"+(index%6)+".png","Assets/"+chosenZine.getCoverImage(),100,100,180,280);
 	detailedZine.setInactive();
 	let readButton = new InteractiveDisplay("Assets/button.png","Assets/read-button.png",125,500,150,60);
 	readButton.getCoverImage().mouseClicked(readZine);
@@ -388,6 +391,31 @@ function showInDetail(index) {
 	menu2.push(readButton);
 	interfaceElements[1] = menu2;
 	appbackground.getCoverImage().size(1080,760);
+	displayMenu(currentMenu);
+}
+
+function showCategory(categoryName) {
+	let chosenCategory = categoryName;
+	currentMenu = 2;
+	interfaceElements[2].length = 0;
+
+	let menu3 = [];
+	let categoryLabel = new InteractiveText(240,80,600,60,"<span style='font-weight:medium;font-size:64px;font-transform:'>"+chosenCategory+"</span>","");
+	categoryLabel.getContent().style("text-align","center");
+	categoryLabel.getContent().style("font-family","Rudiment");
+	menu3.push(categoryLabel);
+	currentZines = [];
+	for(let i=0;i<allZines.length;i++) {
+		if (allZines[i].findCategoryIndex(chosenCategory) !== -1) {
+			let result = currentZines.length;
+			currentZines.push(allZines[i]);
+			let zineTemp = new InteractiveDisplay("Assets/cover-"+(result%6)+".png","Assets/"+allZines[i].getCoverImage(),100+200*(result%4),300-100*(result%2)+300*int(result/4),180,280);
+			zineTemp.setZineID(i);
+			menu3.push(zineTemp);
+		}
+	}
+	interfaceElements[2] = menu3;
+	appbackground.getCoverImage().size(1080,1520);
 	displayMenu(currentMenu);
 }
 
@@ -427,7 +455,7 @@ function setup() {
 
 	// Main Menu
 	let menu1 = [];
-	let popularLabel = new InteractiveText(240,80,600,60,"<span style='font-weight:medium;font-size:48px;'>MAIS POPULARES</span>","");
+	let popularLabel = new InteractiveText(240,80,600,60,"<span style='font-weight:medium;font-size:64px;'>MAIS POPULARES</span>","");
 	popularLabel.getContent().style("text-align","center");
 	popularLabel.getContent().style("font-family","Rudiment");
 	menu1.push(popularLabel);
@@ -448,11 +476,6 @@ function setup() {
 
 	// Category Menu
 	let menu3 = [];
-	for(i=0;i<16;i++) {
-		menu3.push(new InteractiveDisplay("Assets/cover-"+(i%6)+".png","",100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280));
-	}
-	let bigCategoryLabel = new InteractiveText(340,75,400,80,"","Assets/categorias-grey.png");
-	menu3.push(bigCategoryLabel);
 
 	// Search Menu
 	let menu4 = [];
@@ -464,6 +487,10 @@ function setup() {
 
 	// Read Menu (Leitor)
 	let menu5 = []; /* TENTA COLOCAR OS ELEMENTOS NESSE ARRAY, SE POSSÍVEL */
+	let leitorLabel = new InteractiveText(240,80,600,60,"<span style='font-weight:medium;font-size:64px;'>LEITOR</span>","");
+	leitorLabel.getContent().style("text-align","center");
+	leitorLabel.getContent().style("font-family","Rudiment");
+	menu5.push(leitorLabel);
 
 	interfaceElements.push(menu1);
 	interfaceElements.push(menu2);

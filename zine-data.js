@@ -53,7 +53,7 @@ class Zine {
 	}
 
 	findCategoryIndex(categoryName) {
-		return this.categories.findIndex(categoryName);
+		return this.categories.indexOf(categoryName);
 	}
 
 	removeCategory(index) {
@@ -78,7 +78,7 @@ temp.addCategory("Entreterimento");
 allZines.push(temp);
 
 temp = new Zine("tyci.png","","TYCI - Zine 8","Frank","Esta zine fala tudo sobre conflitos criados no oeste asiático e a importância da mulher neste ambiente");
-temp.addCategory("Educação");
+temp.addCategory("Educacao");
 temp.addCategory("Cultura");
 allZines.push(temp);
 
