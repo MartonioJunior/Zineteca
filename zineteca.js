@@ -2,7 +2,7 @@ var currentZines, detailedZine, detailedInfo, detailedDescription, detaliedCateg
 var header;
 var appbackground;
 var credits;
-var allCategories;
+var allCategories, currentCategories;
 var interfaceElements;
 var currentMenu;
 var highlightedCategory;
@@ -44,6 +44,10 @@ class AppHeader {
 		this.searchButton.style("background-color","rgba(0, 0, 0, 0)");
 		this.searchButton.style("border","0px");
 		this.searchButton.mouseClicked(search);
+	}
+
+	getSearchBar() {
+		return this.searchBar;
 	}
 }
 
@@ -214,6 +218,12 @@ class InteractiveDisplay extends InteractiveElement {
 		this.background.show();
 		this.coverImage.show();
 	}
+
+	remove() {
+		this.setInactive();
+		this.background.remove();
+		this.coverImage.remove();
+	}
 }
 
 class InteractiveButton extends InteractiveElement {
@@ -290,6 +300,11 @@ class InteractiveButton extends InteractiveElement {
 	show() {
 		this.categoryLabel.show();
 	}
+
+	remove() {
+		this.setInactive();
+		this.categoryLabel.remove();
+	}
 }
 
 class InteractiveText extends InteractiveElement {
@@ -320,6 +335,11 @@ class InteractiveText extends InteractiveElement {
 	show() {
 		this.content.show();
 	}
+
+	remove() {
+		this.setInactive();
+		this.content.remove();
+	}
 }
 
 function hideAll() {
@@ -338,15 +358,31 @@ function displayMenu(menu) {
 }
 
 function returnToMainMenu() {
-	currentMenu = 0;
-	appbackground.getCoverImage().size(1080,1720);
+	let menu1 = [];
+	let popularLabel = new InteractiveText(240,80,600,60,"<span style='font-weight:medium;font-size:64px;'>Zines</span>","");
+	popularLabel.getContent().style("text-align","center");
+	popularLabel.getContent().style("font-family","Rudiment");
+	menu1.push(popularLabel);
+	for(i=0;i<allZines.length;i++) {
+		let zineDisplay = new InteractiveDisplay("Assets/cover-"+i%6+".png","Assets/"+allZines[i].getCoverImage(),100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280);
+		zineDisplay.setZineID(i);
+		menu1.push(zineDisplay);
+	}
+	for(i=0;i<min(allCategories.length,6);i++) {
+		menu1.push(new InteractiveButton(allCategories[i],-50,900+i*100,650,200,i%4));
+	}
+	let credits = new InteractiveText(520,900,560,800,"<br><br><span style='font-weight:bolder;font-size:30px;'>Créditos</span><br>Equipe Art Lab","Assets/credits-app.png");
+	credits.getContent().style("text-align","center");
+	menu1.push(credits);
+
+	changeMenu(0,menu1);
+	appbackground.getBackground().size(1080,1720);
+	appbackground.getCoverImage().size(0,0);
 	displayMenu(currentMenu);
 }
 
 function showInDetail(index) {
 	let chosenZine = allZines[index];
-	currentMenu = 1;
-	interfaceElements[1].length = 0;
 
 	// Description Menu Rebuilding
 	let menu2 = [];
@@ -389,15 +425,15 @@ function showInDetail(index) {
 	menu2.push(zineBackground);
 	menu2.push(detailedZine);
 	menu2.push(readButton);
-	interfaceElements[1] = menu2;
-	appbackground.getCoverImage().size(1080,760);
+
+	changeMenu(1,menu2);
+	appbackground.getBackground().size(1080,760);
+	appbackground.getCoverImage().size(0,0);
 	displayMenu(currentMenu);
 }
 
 function showCategory(categoryName) {
 	let chosenCategory = categoryName;
-	currentMenu = 2;
-	interfaceElements[2].length = 0;
 
 	let menu3 = [];
 	let categoryLabel = new InteractiveText(240,80,600,60,"<span style='font-weight:medium;font-size:64px;font-transform:'>"+chosenCategory+"</span>","");
@@ -414,21 +450,100 @@ function showCategory(categoryName) {
 			menu3.push(zineTemp);
 		}
 	}
-	interfaceElements[2] = menu3;
-	appbackground.getCoverImage().size(1080,1520);
+
+	changeMenu(2,menu3);
+	appbackground.getBackground().size(1080,1720);
+	appbackground.getCoverImage().size(0,0);
 	displayMenu(currentMenu);
 }
 
 function search() {
-	currentMenu = 3;
-	appbackground.getCoverImage().size(1080,1520);
+	currentZines = [];
+	currentCategories = [];
+
+	let searchTag = header.getSearchBar().value();
+	if (searchTag === "") {
+		return;
+	}
+	let menu4 = [];
+	let pos = 50;
+
+	for (let i = allCategories.length - 1; i >= 0; i--) {
+		if (allCategories[i].search(searchTag) !== -1) {
+			currentCategories.push(allCategories[i]);
+		}
+	}
+
+	for (let i = allZines.length - 1; i >= 0; i--) {
+		if (allZines[i].getName().search(searchTag) !== -1) {
+			currentZines.push(allZines[i]);
+		}
+	}
+
+	let searchLabel = new InteractiveText(240,80,600,60,"<span style='font-weight:medium;font-size:64px;font-transform:'>Resultados para '"+searchTag+"'</span>","");
+	searchLabel.getContent().style("text-align","center");
+	searchLabel.getContent().style("font-family","Rudiment");
+
+	let zineLabel;
+	if (currentZines.length > 0) {
+		zineLabel = new InteractiveText(240,150,600,60,"<span style='font-weight:medium;font-size:48px;font-transform:'>Zines</span>","");
+		for(i=0;i<currentZines.length;i++) {
+			if (i%4 === 0) {
+				pos += 300;
+			}
+			let zineDisplay = new InteractiveDisplay("Assets/cover-"+i%6+".png","Assets/"+currentZines[i].getCoverImage(),100+200*(i%4),pos-100*(i%2),180,280);
+			zineDisplay.setZineID(i);
+			menu4.push(zineDisplay);
+		}
+	} else {
+		zineLabel = new InteractiveText(240,150,600,60,"<span style='font-weight:medium;font-size:48px;font-transform:'>Nenhum resultado em Zines</span>","");
+	}
+	zineLabel.getContent().style("text-align","center");
+	zineLabel.getContent().style("font-family","Rudiment");
+	menu4.push(zineLabel);
+
+	let categoryLabel;
+	pos += 300;
+	if (currentCategories.length > 0) {
+		categoryLabel = new InteractiveText(240,pos,600,60,"<span style='font-weight:medium;font-size:48px;font-transform:'>Categorias</span>","");
+		pos -= 20;
+
+		for(i=0;i<currentCategories.length;i++) {
+			pos += 100;
+			let category = new InteractiveButton(currentCategories[i],-50,pos,1130,200,i%4);
+			category.getCategoryLabel().style("rotate",0);
+			menu4.push(category);
+		}
+	} else {
+		categoryLabel = new InteractiveText(240,pos,600,60,"<span style='font-weight:medium;font-size:48px;font-transform:'>Nenhum resultado em Categorias</span>","");
+	}
+	categoryLabel.getContent().style("text-align","center");
+	categoryLabel.getContent().style("font-family","Rudiment");
+	menu4.push(categoryLabel);
+
+	menu4.push(searchLabel);
+
+	pos += 400;
+	changeMenu(3,menu4);
+	appbackground.getBackground().size(1080,pos);
+	appbackground.getCoverImage().size(0,0);
 	displayMenu(currentMenu);
 }
 
 function readZine() {
 	currentMenu = 4;
-	appbackground.getCoverImage().size(1080,760);
+	appbackground.getBackground().size(1080,760);
+	appbackground.getCoverImage().size(0,0);
 	displayMenu(currentMenu);
+}
+
+function changeMenu(menuID, newElements) {
+	currentMenu = menuID;
+	for (var i = interfaceElements[menuID].length - 1; i >= 0; i--) {
+		interfaceElements[menuID][i].remove();
+	}
+	interfaceElements[menuID].length = 0;
+	interfaceElements[menuID] = newElements;
 }
 
 function setup() {
@@ -446,30 +561,16 @@ function setup() {
 	}
 
 	currentZines = [];
+	currentCategories = [];
 
 	interfaceElements = [];
 
 	appbackground = new InteractiveDisplay("Assets/background-app.png","",0,0,1080,1720);
-	appbackground.getBackground().style("margin-top","0px");
-	appbackground.getCoverImage().position(0,0);
+	appbackground.getCoverImage().style("margin-top","0px");
+	appbackground.getBackground().position(0,0);
 
 	// Main Menu
 	let menu1 = [];
-	let popularLabel = new InteractiveText(240,80,600,60,"<span style='font-weight:medium;font-size:64px;'>MAIS POPULARES</span>","");
-	popularLabel.getContent().style("text-align","center");
-	popularLabel.getContent().style("font-family","Rudiment");
-	menu1.push(popularLabel);
-	for(i=0;i<allZines.length;i++) {
-		let zineDisplay = new InteractiveDisplay("Assets/cover-"+i%6+".png","Assets/"+allZines[i].getCoverImage(),100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280);
-		zineDisplay.setZineID(i);
-		menu1.push(zineDisplay);
-	}
-	for(i=0;i<min(allCategories.length,6);i++) {
-		menu1.push(new InteractiveButton(allCategories[i],-50,900+i*100,650,200,i%4));
-	}
-	let credits = new InteractiveText(520,900,560,800,"<br><br><span style='font-weight:bolder;font-size:30px;'>Créditos</span><br>Equipe Art Lab","Assets/credits-app.png");
-	credits.getContent().style("text-align","center");
-	menu1.push(credits);
 
 	// Description Menu
 	let menu2 = [];
@@ -479,11 +580,6 @@ function setup() {
 
 	// Search Menu
 	let menu4 = [];
-	for(i=0;i<16;i++) {
-		menu4.push(new InteractiveDisplay("Assets/cover-"+(i%6)+".png","",100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280));
-	}
-	let searchResultsLabel = new InteractiveText(340,75,400,80,"","Assets/categorias-cardboard.png");
-	menu4.push(searchResultsLabel);
 
 	// Read Menu (Leitor)
 	let menu5 = []; /* TENTA COLOCAR OS ELEMENTOS NESSE ARRAY, SE POSSÍVEL */
@@ -498,8 +594,7 @@ function setup() {
 	interfaceElements.push(menu4);
 	interfaceElements.push(menu5);
 
-	//returnToMainMenu();
-	readZine(0);
+	returnToMainMenu();
 
 	header = new AppHeader();
 }
