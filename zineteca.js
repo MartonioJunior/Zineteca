@@ -15,7 +15,6 @@ class AppHeader {
 		this.overlay.style("background-image","url('Assets/header-app.png')");
 		this.overlay.style("background-size","1500px 100px");
 		this.overlay.style("background-position","-100px -30px");
-		//this.overlay.style("background-color","#BA007C");
 		this.overlay.style("margin-top","0px");
 		this.logoButton = createButton("");
 		this.logoButton.position(0,0);
@@ -31,16 +30,14 @@ class AppHeader {
 		this.searchBar.position(240,8); // 240
 		this.searchBar.size(600,30);
 		this.searchBar.style("background-color","rgba(255, 255, 255, 0.5)");
-		this.searchBar.style("font-family","Dosis");
+		this.searchBar.style("font-family","Dosis Extra Light");
 		this.searchBar.style("font-size","24px");
-		this.searchBar.style("font-weight","lighter");
 		this.searchBar.style("border","0px");
 		this.searchButton = createButton("");
 		this.searchButton.position(810,13);
 		this.searchButton.size(20,20);
 		this.searchButton.style("background-image","url('Assets/search icon.png')");
 		this.searchButton.style("background-size","20px 20px");
-		//this.searchButton.style("background-position","center");
 		this.searchButton.style("background-color","rgba(0, 0, 0, 0)");
 		this.searchButton.style("border","0px");
 		this.searchButton.mouseClicked(search);
@@ -244,9 +241,8 @@ class InteractiveButton extends InteractiveElement {
 		this.categoryLabel.mouseClicked(this.clicked);
 		this.categoryLabel.style("text-transform","uppercase");
 		this.categoryLabel.style("text-align","center");
-		this.categoryLabel.style("font-family","Dosis");
+		this.categoryLabel.style("font-family","Dosis Extra Bold");
 		this.categoryLabel.style("font-size","40px");
-		this.categoryLabel.style("font-weight","bolder");
 		this.categoryLabel.style("background-image","url('Assets/category-app-"+index+".png')");
 		this.categoryLabel.style("background-size","1700px 200px");
 		this.categoryLabel.style("background-repeat","repeat-x");
@@ -342,6 +338,13 @@ class InteractiveText extends InteractiveElement {
 	}
 }
 
+class InteractiveBigText extends InteractiveText {
+	constructor(xPos,yPos,widthSize,heightSize,text,image) {
+		super(xPos,yPos,widthSize,heightSize,text,image);
+		this.getContent().style("text-shadow","2px 2px 2px #000000");;
+	}
+}
+
 function hideAll() {
 	for (var i = interfaceElements.length - 1; i >= 0; i--) {
 		for (var j = interfaceElements[i].length - 1; j >= 0; j--) {
@@ -359,9 +362,9 @@ function displayMenu(menu) {
 
 function returnToMainMenu() {
 	let menu1 = [];
-	let popularLabel = new InteractiveText(240,80,600,60,"<span style='font-weight:medium;font-size:64px;'>Zines</span>","");
+	let popularLabel = new InteractiveBigText(240,80,600,60,"<span style='font-size:64px;'>Zines</span>","");
 	popularLabel.getContent().style("text-align","center");
-	popularLabel.getContent().style("font-family","Rudiment");
+	popularLabel.getContent().style("font-family","Title Zineteca");
 	menu1.push(popularLabel);
 	for(i=0;i<allZines.length;i++) {
 		let zineDisplay = new InteractiveDisplay("Assets/cover-"+i%6+".png","Assets/"+allZines[i].getCoverImage(),100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280);
@@ -371,7 +374,7 @@ function returnToMainMenu() {
 	for(i=0;i<min(allCategories.length,6);i++) {
 		menu1.push(new InteractiveButton(allCategories[i],-50,900+i*100,650,200,i%4));
 	}
-	let credits = new InteractiveText(520,900,560,800,"<br><br><span style='font-weight:bolder;font-size:30px;'>Créditos</span><br>Equipe Art Lab","Assets/credits-app.png");
+	let credits = new InteractiveText(520,900,560,800,"<br><br><span style='font-family:Dosis Extra Bold;font-size:30px;'>Créditos</span><br>Equipe Art Lab","Assets/credits-app.png");
 	credits.getContent().style("text-align","center");
 	menu1.push(credits);
 
@@ -411,8 +414,8 @@ function showInDetail(index) {
 	detailedZine.setInactive();
 	let readButton = new InteractiveDisplay("Assets/button.png","Assets/read-button.png",125,500,150,60);
 	readButton.getCoverImage().mouseClicked(readZine);
-	detailedDescription = new InteractiveText(350,100,600,180,"<span style='font-weight:bolder;'>Descrição</span><span style='font-size:16px;'><br>"+chosenZine.getDescription(),"");
-	detailedInfo = new InteractiveText(100,380,180,100,"<span style='font-weight:bolder;'>"+chosenZine.getName()+"</span><br>"+chosenZine.getAuthor(),"");
+	detailedDescription = new InteractiveText(350,100,600,180,"<span style='font-family:Dosis Extra Bold;'>Descrição</span><span style='font-size:16px;'><br>"+chosenZine.getDescription(),"");
+	detailedInfo = new InteractiveText(100,380,180,100,"<span style='font-family:Dosis Extra Bold;'>"+chosenZine.getName()+"</span><br>"+chosenZine.getAuthor(),"");
 	detailedInfo.getContent().style("font-size","20px");
 	let categoryLabel = new InteractiveText(530,305,200,40,"","Assets/categorias-cardboard.png");
 
@@ -436,23 +439,28 @@ function showCategory(categoryName) {
 	let chosenCategory = categoryName;
 
 	let menu3 = [];
-	let categoryLabel = new InteractiveText(240,80,600,60,"<span style='font-weight:medium;font-size:64px;font-transform:'>"+chosenCategory+"</span>","");
+	let categoryLabel = new InteractiveBigText(240,80,600,60,"<span style='font-size:64px;font-transform:'>"+chosenCategory+"</span>","");
 	categoryLabel.getContent().style("text-align","center");
-	categoryLabel.getContent().style("font-family","Rudiment");
+	categoryLabel.getContent().style("font-family","Title Zineteca");
 	menu3.push(categoryLabel);
 	currentZines = [];
+	let pos = 350;
 	for(let i=0;i<allZines.length;i++) {
 		if (allZines[i].findCategoryIndex(chosenCategory) !== -1) {
 			let result = currentZines.length;
 			currentZines.push(allZines[i]);
-			let zineTemp = new InteractiveDisplay("Assets/cover-"+(result%6)+".png","Assets/"+allZines[i].getCoverImage(),100+200*(result%4),300-100*(result%2)+300*int(result/4),180,280);
+			let zineTemp = new InteractiveDisplay("Assets/cover-"+(result%6)+".png","Assets/"+allZines[i].getCoverImage(),100+200*(result%4),pos-100*(result%2),180,280);
 			zineTemp.setZineID(i);
 			menu3.push(zineTemp);
+			if (result % 4 === 3) {
+				pos += 300;
+			}
 		}
 	}
 
+	pos += 400;
 	changeMenu(2,menu3);
-	appbackground.getBackground().size(1080,1720);
+	appbackground.getBackground().size(1080,pos);
 	appbackground.getCoverImage().size(0,0);
 	displayMenu(currentMenu);
 }
@@ -473,6 +481,7 @@ function search() {
 			currentCategories.push(allCategories[i]);
 		}
 	}
+	console.log(allCategories);
 
 	for (let i = allZines.length - 1; i >= 0; i--) {
 		if (allZines[i].getName().search(searchTag) !== -1) {
@@ -480,13 +489,13 @@ function search() {
 		}
 	}
 
-	let searchLabel = new InteractiveText(240,80,600,60,"<span style='font-weight:medium;font-size:64px;font-transform:'>Resultados para '"+searchTag+"'</span>","");
+	let searchLabel = new InteractiveBigText(240,80,600,60,"<span style='font-size:64px;font-transform:'>Resultados para '"+searchTag+"'</span>","");
 	searchLabel.getContent().style("text-align","center");
-	searchLabel.getContent().style("font-family","Rudiment");
+	searchLabel.getContent().style("font-family","Title Zineteca");
 
 	let zineLabel;
 	if (currentZines.length > 0) {
-		zineLabel = new InteractiveText(240,150,600,60,"<span style='font-weight:medium;font-size:48px;font-transform:'>Zines</span>","");
+		zineLabel = new InteractiveBigText(240,150,600,60,"<span style='font-size:48px;font-transform:'>Zines</span>","");
 		for(i=0;i<currentZines.length;i++) {
 			if (i%4 === 0) {
 				pos += 300;
@@ -496,16 +505,17 @@ function search() {
 			menu4.push(zineDisplay);
 		}
 	} else {
-		zineLabel = new InteractiveText(240,150,600,60,"<span style='font-weight:medium;font-size:48px;font-transform:'>Nenhum resultado em Zines</span>","");
+		zineLabel = new InteractiveBigText(240,250,600,60,"<span style='font-size:48px;font-transform:'>Nenhum resultado em Zines</span>","");
+		pos += 100;
 	}
 	zineLabel.getContent().style("text-align","center");
-	zineLabel.getContent().style("font-family","Rudiment");
+	zineLabel.getContent().style("font-family","Title Zineteca");
 	menu4.push(zineLabel);
 
 	let categoryLabel;
 	pos += 300;
 	if (currentCategories.length > 0) {
-		categoryLabel = new InteractiveText(240,pos,600,60,"<span style='font-weight:medium;font-size:48px;font-transform:'>Categorias</span>","");
+		categoryLabel = new InteractiveBigText(240,pos,600,60,"<span style='font-size:48px;font-transform:'>Categorias</span>","");
 		pos -= 20;
 
 		for(i=0;i<currentCategories.length;i++) {
@@ -515,10 +525,10 @@ function search() {
 			menu4.push(category);
 		}
 	} else {
-		categoryLabel = new InteractiveText(240,pos,600,60,"<span style='font-weight:medium;font-size:48px;font-transform:'>Nenhum resultado em Categorias</span>","");
+		categoryLabel = new InteractiveBigText(240,pos,600,60,"<span style='font-size:48px;font-transform:'>Nenhum resultado em Categorias</span>","");
 	}
 	categoryLabel.getContent().style("text-align","center");
-	categoryLabel.getContent().style("font-family","Rudiment");
+	categoryLabel.getContent().style("font-family","Title Zineteca");
 	menu4.push(categoryLabel);
 
 	menu4.push(searchLabel);
@@ -583,9 +593,9 @@ function setup() {
 
 	// Read Menu (Leitor)
 	let menu5 = []; /* TENTA COLOCAR OS ELEMENTOS NESSE ARRAY, SE POSSÍVEL */
-	let leitorLabel = new InteractiveText(240,80,600,60,"<span style='font-weight:medium;font-size:64px;'>LEITOR</span>","");
+	let leitorLabel = new InteractiveBigText(240,80,600,60,"<span style='font-size:64px;'>LEITOR</span>","");
 	leitorLabel.getContent().style("text-align","center");
-	leitorLabel.getContent().style("font-family","Rudiment");
+	leitorLabel.getContent().style("font-family","Title Zineteca");
 	menu5.push(leitorLabel);
 
 	interfaceElements.push(menu1);

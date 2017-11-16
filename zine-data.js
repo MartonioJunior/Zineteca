@@ -1,7 +1,7 @@
 class Zine {
-	constructor(coverImage,pdf,name,author,description) {
+	constructor(coverImage,pagesTag,name,author,description) {
 		this.coverImage = coverImage;
-		this.pdf = pdf;
+		this.pagesTag = pagesTag;
 		this.name = name;
 		this.author = author;
 		this.description = description;
@@ -16,12 +16,12 @@ class Zine {
 		return this.coverImage;
 	}
 
-	setPdf(newPdf) {
-		this.pdf = newPdf;
+	setPagesTag(newTag) {
+		this.pagesTag = newTag;
 	}
 
-	getPdf() {
-		return this.pdf;
+	getPagesTag() {
+		return this.pagesTag;
 	}
 
 	setName(newName) {
@@ -78,7 +78,7 @@ temp.addCategory("Entreterimento");
 allZines.push(temp);
 
 temp = new Zine("tyci.png","","TYCI - Zine 8","Frank","Esta zine fala tudo sobre conflitos criados no oeste asiático e a importância da mulher neste ambiente");
-temp.addCategory("Educacao");
+temp.addCategory("Educação");
 temp.addCategory("Cultura");
 allZines.push(temp);
 
