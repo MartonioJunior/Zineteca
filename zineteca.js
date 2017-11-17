@@ -1,5 +1,5 @@
 var currentZines, detailedZine, detailedInfo, detailedDescription, detaliedCategories;
-var header;
+var header, reader;
 var appbackground;
 var credits;
 var allCategories, currentCategories;
@@ -341,7 +341,64 @@ class InteractiveText extends InteractiveElement {
 class InteractiveBigText extends InteractiveText {
 	constructor(xPos,yPos,widthSize,heightSize,text,image) {
 		super(xPos,yPos,widthSize,heightSize,text,image);
-		this.getContent().style("text-shadow","2px 2px 2px #000000");;
+		this.getContent().style("text-shadow","2px 2px 2px #000000");
+	}
+}
+
+class ZineReader extends InteractiveElement {
+	constructor(zine,x,y,widthSize,heightSize) {
+		super(x,y,widthSize,heightSize);
+		this.setReader(zine);
+	}
+
+	setReader(zine) {
+		this.leitor = createDiv("<div class='hard'>  </div>");
+		this.leitor.id("flipbook");
+		this.leitor.position(this.getX(),this.getY());
+		this.leitor.size(this.getWidth(),this.getHeight());
+
+		let capa = createDiv("");
+		capa.style("background-image","url('Zines/"+zine.getPagesTag()+"/capa.jpg')");
+		capa.style("background-size",this.getWidth()/2+"px "+this.getHeight()+"px");
+		capa.class("p1");
+		capa.size(this.getWidth()/2,this.getHeight());
+		capa.parent("flipbook");
+
+		for(let page = 1; page <= zine.getPagesNumber(); page++) {
+			let numberPage = page + 1;
+			let pagina = createDiv("");
+			pagina.style("background-image","url('Zines/"+zine.getPagesTag()+"/pag"+page+".jpg')");
+			pagina.style("background-size",this.getWidth()/2+"px "+this.getHeight()+"px");
+			pagina.class("p"+numberPage);
+			pagina.size(this.getWidth()/2,this.getHeight());
+			pagina.parent("flipbook");
+		}
+
+		this.leitor = $("#flipbook");
+		this.leitor.turn({
+		    width: this.getWidth(),
+		    height: this.getHeight(),
+		    autoCenter: true
+		});
+		this.leitor.turn("resize");
+
+		return select("#flipbook");
+	}
+
+	getReader() {
+		return this.leitor;
+	}
+
+	hide() {
+		this.leitor.hide();
+	}
+
+	show() {
+		this.leitor.show();
+	}
+
+	remove() {
+		this.leitor.remove();
 	}
 }
 
@@ -366,7 +423,7 @@ function returnToMainMenu() {
 	popularLabel.getContent().style("text-align","center");
 	popularLabel.getContent().style("font-family","Title Zineteca");
 	menu1.push(popularLabel);
-	for(i=0;i<allZines.length;i++) {
+	for(i=0;i<min(allZines.length,6);i++) {
 		let zineDisplay = new InteractiveDisplay("Assets/cover-"+i%6+".png","Assets/"+allZines[i].getCoverImage(),100+200*(i%4),300-100*(i%2)+300*int(i/4),180,280);
 		zineDisplay.setZineID(i);
 		menu1.push(zineDisplay);
@@ -411,6 +468,7 @@ function showInDetail(index) {
 	let zineBackground = new InteractiveDisplay("Assets/zine-displayer.png","",50,80,280,540);
 	zineBackground.setInactive();
 	detailedZine = new InteractiveDisplay("Assets/cover-"+(index%6)+".png","Assets/"+chosenZine.getCoverImage(),100,100,180,280);
+	detailedZine.setZineID(index);
 	detailedZine.setInactive();
 	let readButton = new InteractiveDisplay("Assets/button.png","Assets/read-button.png",125,500,150,60);
 	readButton.getCoverImage().mouseClicked(readZine);
@@ -481,7 +539,6 @@ function search() {
 			currentCategories.push(allCategories[i]);
 		}
 	}
-	console.log(allCategories);
 
 	for (let i = allZines.length - 1; i >= 0; i--) {
 		if (allZines[i].getName().search(searchTag) !== -1) {
@@ -530,7 +587,6 @@ function search() {
 	categoryLabel.getContent().style("text-align","center");
 	categoryLabel.getContent().style("font-family","Title Zineteca");
 	menu4.push(categoryLabel);
-
 	menu4.push(searchLabel);
 
 	pos += 400;
@@ -540,9 +596,26 @@ function search() {
 	displayMenu(currentMenu);
 }
 
+function startReader(zine, x, y, largura, altura) {
+	return new ZineReader(zine,x,y,largura,altura);
+}
+
 function readZine() {
-	currentMenu = 4;
-	appbackground.getBackground().size(1080,760);
+	let menu5 = [];
+	let zine = allZines[detailedZine.getCoverImage().zineID];
+	let leitorLabel = new InteractiveBigText(240,60,600,60,"<span style='font-size:64px;'>LEITOR</span>","");
+	leitorLabel.getContent().style("text-align","center");
+	leitorLabel.getContent().style("font-family","Title Zineteca");
+
+	if (reader) {
+		reader.remove();
+	}
+	reader = startReader(zine, 180, 100, 720, 550);
+	menu5.push(leitorLabel);
+	menu5.push(reader);
+
+	changeMenu(4,menu5);
+	appbackground.getBackground().size(1080,980);
 	appbackground.getCoverImage().size(0,0);
 	displayMenu(currentMenu);
 }
@@ -592,11 +665,7 @@ function setup() {
 	let menu4 = [];
 
 	// Read Menu (Leitor)
-	let menu5 = []; /* TENTA COLOCAR OS ELEMENTOS NESSE ARRAY, SE POSSÍVEL */
-	let leitorLabel = new InteractiveBigText(240,80,600,60,"<span style='font-size:64px;'>LEITOR</span>","");
-	leitorLabel.getContent().style("text-align","center");
-	leitorLabel.getContent().style("font-family","Title Zineteca");
-	menu5.push(leitorLabel);
+	let menu5 = [];
 
 	interfaceElements.push(menu1);
 	interfaceElements.push(menu2);
