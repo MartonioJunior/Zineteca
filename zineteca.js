@@ -176,7 +176,6 @@ class InteractiveDisplay extends InteractiveElement {
 		this.coverImage.mouseOut(this.isOutside);
 		this.coverImage.mouseClicked(this.clicked);
 		this.coverImage.style("background-size",this.getWidth()*0.7+"px "+this.getHeight()*0.7+"px");
-		this.coverImage.style("background-position",this.getWidth()*0.15+"px "+this.getHeight()*0.15+"px");
 		this.coverImage.style("background-repeat","no-repeat");
 	}
 
@@ -281,6 +280,14 @@ class InteractiveButton extends InteractiveElement {
 		this.categoryLabel.style("font-size",this.baseFontSize*innerWidth+"px");
 	}
 
+	positionBackground(xRel,yRel) {
+		this.categoryLabel.style("background-position",xRel/1349*innerWidth+"px "+yRel/1349*innerWidth+"px");
+	}
+
+	sizeBackground(widthRel, heightRel) {
+		this.categoryLabel.style("background-size",widthRel/1349*innerWidth+"px "+heightRel/1349*innerWidth+"px");
+	}
+
 	getCategoryLabel() {
 		return this.categoryLabel;
 	}
@@ -305,8 +312,8 @@ class InteractiveButton extends InteractiveElement {
 		} else {
 			return;
 		}
-		this.categoryLabel.position(this.getX(),this.getY()-(this.sizeValue*1.4)); // this.sizeValue*3
-		this.categoryLabel.size(this.getWidth()+(this.sizeValue*0.003*this.getWidth()),this.getHeight()+(this.sizeValue*1.4));
+		this.categoryLabel.position(this.getX(),this.getY()-(this.sizeValue*0.001*innerWidth)); // this.sizeValue*3
+		this.categoryLabel.size(this.getWidth()+this.sizeValue*0.003*this.getWidth(),this.getHeight()+this.sizeValue*0.001*innerWidth);
 	}
 
 	clicked() {
@@ -506,8 +513,8 @@ function showInDetail(index) {
 	for(i=0;i<chosenZine.getAllCategories().length;i++) {
 		let categoryTag = new InteractiveButton(chosenZine.getCategory(i),560+(i%3)*220,390+80*int(i/3),220,70,i%4);
 		categoryTag.setBaseFontSize(20);
-		categoryTag.getCategoryLabel().style("background-size","220px 50px");
-		categoryTag.getCategoryLabel().style("background-position","0px 15px");
+		categoryTag.sizeBackground(220,50);
+		categoryTag.positionBackground(0,15);
 		detailedCategories.push(categoryTag);
 		menu2.push(categoryTag);
 	}
@@ -545,8 +552,6 @@ function showCategory(categoryName) {
 
 	let menu3 = [];
 	let categoryLabel = new InteractiveBigText(509,80,600,60,chosenCategory,"");
-	categoryLabel.getContent().style("text-align","center");
-	categoryLabel.getContent().style("font-family","Title Zineteca");
 	menu3.push(categoryLabel);
 	currentZines = [];
 	let pos = 250;
@@ -699,7 +704,7 @@ function setup() {
 	categoriesSidebar.push(categoryLabel);
 	for(i=0;i<allCategories.length;i++) {
 		let buttonCategory = new InteractiveButton(allCategories[i],-20,100+i*100,300,150,i%4);
-		buttonCategory.getCategoryLabel().style("background-position","-600px 0px");
+		buttonCategory.positionBackground(-600,0);
 		buttonCategory.getCategoryLabel().style("rotate",10);
 		categoriesSidebar.push(buttonCategory);
 	}
