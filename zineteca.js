@@ -55,7 +55,8 @@ class AppHeader {
 		this.resize();
 	}
 
-	resize() { // OK
+	resize() { // Aqui já está OK
+		this.overlay.position(0,0);
 		this.overlay.size(innerWidth,0.052*innerWidth);
 		this.overlay.style("background-size",(1.111*innerWidth)+"px "+(0.074*innerWidth)+"px");
 		this.overlay.style("background-position",(-0.074*innerWidth)+"px "+(-0.022*innerWidth)+"px");
@@ -72,39 +73,43 @@ class AppHeader {
 
 class InteractiveElement {
 	constructor(xPos,yPos,widthSize,heightSize) {
-		this.x = xPos;
-		this.y = yPos;
-		this.width = widthSize;
-		this.height = heightSize;
+		this.baseWidth = widthSize/1349;
+		this.baseHeight = heightSize/1349;
+		this.baseX = xPos/1349;
+		this.baseY = yPos/1349;
+		this.x = this.baseX*innerWidth;
+		this.y = this.baseY*innerWidth;
+		this.width = this.baseWidth*innerWidth;
+		this.height = this.baseHeight*innerWidth;
 		this.active = true;
 	}
 
-	setX(newX) {
-		this.x = newX;
+	getBaseX() {
+		return this.baseX;
 	}
 
 	getX() {
 		return this.x;
 	}
 
-	setY(newY) {
-		this.y = newY;
+	getBaseY() {
+		return this.baseY;
 	}
 
 	getY() {
 		return this.y;
 	}
 
-	setWidth(newWidth) {
-		this.width = newWidth;
+	getBaseWidth() {
+		return this.baseWidth;
 	}
 
 	getWidth() {
 		return this.width;
 	}
 
-	setHeight(newHeight) {
-		this.height = newHeight;
+	getBaseHeight() {
+		return this.baseHeight;
 	}
 
 	getHeight() {
@@ -248,6 +253,7 @@ class InteractiveDisplay extends InteractiveElement {
 class InteractiveButton extends InteractiveElement {
 	constructor(categoryName,xPos,yPos,widthSize,heightSize,index) {
 		super(xPos,yPos,widthSize,heightSize);
+		this.baseFontSize = 30/1349;
 		this.setCategoryLabel(categoryName, index);
 		this.sizeValue = 0;
 		this.categoryLabel.inside = false;
@@ -264,10 +270,15 @@ class InteractiveButton extends InteractiveElement {
 		this.categoryLabel.style("text-transform","uppercase");
 		this.categoryLabel.style("text-align","center");
 		this.categoryLabel.style("font-family","Dosis Extra Bold");
-		this.categoryLabel.style("font-size","30px");
+		this.categoryLabel.style("font-size",this.baseFontSize*innerWidth+"px");
 		this.categoryLabel.style("background-image","url('Assets/category-app-"+index+".png')");
 		this.categoryLabel.style("background-size",(this.getWidth()*3)+"px "+this.getHeight()+"px");
 		this.categoryLabel.style("background-repeat","no-repeat");
+	}
+
+	setBaseFontSize(size) {
+		this.baseFontSize = size/1349;
+		this.categoryLabel.style("font-size",this.baseFontSize*innerWidth+"px");
 	}
 
 	getCategoryLabel() {
@@ -327,6 +338,7 @@ class InteractiveButton extends InteractiveElement {
 class InteractiveText extends InteractiveElement {
 	constructor(xPos,yPos,widthSize,heightSize,text,image) {
 		super(xPos,yPos,widthSize,heightSize);
+		this.baseFontSize = 24/1349;
 		this.setContent(text,image);
 	}
 
@@ -341,8 +353,16 @@ class InteractiveText extends InteractiveElement {
 		this.content.style("background-image","url('"+image+"')");
 		this.content.style("background-size",this.getWidth()+"px "+this.getHeight()+"px");
 		this.content.style("font-family","Dosis");
-		this.content.style("font-size","24px");
-		this.content.style("text-shadow","4px 4px 4px #DDDDDD");
+		this.content.style("font-size",this.baseFontSize*innerWidth+"px");
+		let shadowSize = this.baseFontSize*innerWidth/6;
+		this.content.style("text-shadow",shadowSize+"px "+shadowSize+"px "+shadowSize+"px #DDDDDD");
+	}
+
+	setBaseFontSize(size) {
+		this.baseFontSize = size/1349;
+		this.content.style("font-size",this.baseFontSize*innerWidth+"px");
+		let shadowSize = this.baseFontSize*innerWidth/6;
+		this.content.style("text-shadow",shadowSize+"px "+shadowSize+"px "+shadowSize+"px #DDDDDD");
 	}
 
 	hide() {
@@ -362,9 +382,19 @@ class InteractiveText extends InteractiveElement {
 class InteractiveBigText extends InteractiveText {
 	constructor(xPos,yPos,widthSize,heightSize,text,image) {
 		super(xPos,yPos,widthSize,heightSize,text,image);
-		this.getContent().style("text-shadow","2px 2px 2px #000000");
+		this.baseFontSize = 64/1349;
 		this.getContent().style("text-align","center");
 		this.getContent().style("font-family","Title Zineteca");
+		this.getContent().style("font-size",this.baseFontSize*innerWidth+"px");
+		let shadowSize = this.baseFontSize*innerWidth/32;
+		this.getContent().style("text-shadow",shadowSize+"px "+shadowSize+"px "+shadowSize+"px #000000");
+	}
+
+	setBaseFontSize(size) {
+		this.baseFontSize = size/1349;
+		this.getContent().style("font-size",this.baseFontSize*innerWidth+"px");
+		let shadowSize = this.baseFontSize*innerWidth/32;
+		this.getContent().style("text-shadow",shadowSize+"px "+shadowSize+"px "+shadowSize+"px #000000");
 	}
 }
 
@@ -442,9 +472,9 @@ function displayMenu(menu) {
 
 function returnToMainMenu() {
 	let menu1 = [];
-	let popularLabel = new InteractiveBigText(509,80,600,60,"<span style='font-size:64px;'>Zines</span>","");
+	let popularLabel = new InteractiveBigText(509,80,600,60,"Zines","");
 	menu1.push(popularLabel);
-	pos = 200;
+	pos = 250;
 	for(i=0;i<allZines.length;i++) {
 		let zineDisplay = new InteractiveDisplay("Assets/cover-"+i%6+".png","Assets/"+allZines[i].getCoverImage(),569-200*(int(i/2)%2)+400*(i%2),pos+100*(int(i/2)%2),180,280);
 		zineDisplay.setZineID(i);
@@ -456,8 +486,7 @@ function returnToMainMenu() {
 	pos += 400;
 
 	changeMenu(0,menu1);
-	appbackground.getBackground().size(1349,max(pos,100+allCategories.length*100));
-	appbackground.getCoverImage().size(0,0);
+	appbackground.size(innerWidth,max(pos,100+allCategories.length*100));
 	displayMenu(currentMenu);
 }
 
@@ -476,10 +505,9 @@ function showInDetail(index) {
 	detailedCategories = [];
 	for(i=0;i<chosenZine.getAllCategories().length;i++) {
 		let categoryTag = new InteractiveButton(chosenZine.getCategory(i),560+(i%3)*220,390+80*int(i/3),220,70,i%4);
-		categoryTag.getCategoryLabel().style("font-size","20px");
+		categoryTag.setBaseFontSize(20);
 		categoryTag.getCategoryLabel().style("background-size","220px 50px");
 		categoryTag.getCategoryLabel().style("background-position","0px 15px");
-		categoryTag.getCategoryLabel().style("background-repeat","no-repeat");
 		detailedCategories.push(categoryTag);
 		menu2.push(categoryTag);
 	}
@@ -491,9 +519,10 @@ function showInDetail(index) {
 	detailedZine.setInactive();
 	let readButton = new InteractiveDisplay("Assets/button.png","Assets/read-button.png",394,500,150,60);
 	readButton.getCoverImage().mouseClicked(readZine);
-	detailedDescription = new InteractiveText(619,100,600,180,"<span style='font-family:Dosis Extra Bold;'>Descrição</span><span style='font-size:16px;'><br>"+chosenZine.getDescription(),"");
+	detailedDescription = new InteractiveText(619,100,600,180,"<span style='font-family:Dosis Extra Bold;'>Descrição</span><br>"+chosenZine.getDescription(),"");
+	detailedDescription.setBaseFontSize(20);
 	detailedInfo = new InteractiveText(369,380,180,100,"<span style='font-family:Dosis Extra Bold;'>"+chosenZine.getName()+"</span><br>"+chosenZine.getAuthor(),"");
-	detailedInfo.getContent().style("font-size","20px");
+	detailedInfo.setBaseFontSize(20);
 	let categoryLabel = new InteractiveText(799,305,200,40,"","Assets/categorias-cardboard.png");
 
 	menu2.push(descriptionBackground);
@@ -507,8 +536,7 @@ function showInDetail(index) {
 	menu2.push(readButton);
 
 	changeMenu(1,menu2);
-	appbackground.getBackground().size(1349,760);
-	appbackground.getCoverImage().size(0,0);
+	appbackground.size(innerWidth,760);
 	displayMenu(currentMenu);
 }
 
@@ -516,7 +544,7 @@ function showCategory(categoryName) {
 	let chosenCategory = categoryName;
 
 	let menu3 = [];
-	let categoryLabel = new InteractiveBigText(509,80,600,60,"<span style='font-size:64px;font-transform:'>"+chosenCategory+"</span>","");
+	let categoryLabel = new InteractiveBigText(509,80,600,60,chosenCategory,"");
 	categoryLabel.getContent().style("text-align","center");
 	categoryLabel.getContent().style("font-family","Title Zineteca");
 	menu3.push(categoryLabel);
@@ -537,8 +565,7 @@ function showCategory(categoryName) {
 
 	pos += 400;
 	changeMenu(2,menu3);
-	appbackground.getBackground().size(1349,max(pos,100+allCategories.length*100));
-	appbackground.getCoverImage().size(0,0);
+	appbackground.size(innerWidth,max(pos,100+allCategories.length*100));
 	displayMenu(currentMenu);
 }
 
@@ -565,11 +592,12 @@ function search() {
 		}
 	}
 
-	let searchLabel = new InteractiveBigText(269,80,1080,60,"<span style='font-size:64px;font-transform:'>Resultados para '"+searchTag+"'</span>","");
+	let searchLabel = new InteractiveBigText(269,60,1080,60,"Resultados para '"+searchTag+"'","");
+	searchLabel.setBaseFontSize(64);
 
 	let zineLabel;
 	if (currentZines.length > 0) {
-		zineLabel = new InteractiveBigText(269,150,1080,60,"<span style='font-size:48px;font-transform:'>Zines</span>","");
+		zineLabel = new InteractiveBigText(269,150,1080,60,"Zines","");
 		for(i=0;i<currentZines.length;i++) {
 			if (i%4 === 0) {
 				pos += 300;
@@ -580,33 +608,33 @@ function search() {
 			menu4.push(zineDisplay);
 		}
 	} else {
-		zineLabel = new InteractiveBigText(269,250,1080,60,"<span style='font-size:48px;font-transform:'>Nenhum resultado em Zines</span>","");
+		zineLabel = new InteractiveBigText(269,250,1080,60,"Nenhum resultado em Zines","");
 		pos += 100;
 	}
+	zineLabel.setBaseFontSize(48);
 	menu4.push(zineLabel);
 
 	let categoryLabel;
-	pos += 300;
+	pos += 400;
 	if (currentCategories.length > 0) {
-		categoryLabel = new InteractiveBigText(269,pos,1080,60,"<span style='font-size:48px;font-transform:'>Categorias</span>","");
-		pos -= 20;
+		categoryLabel = new InteractiveBigText(269,pos,1080,60,"Categorias","");
 
 		for(i=0;i<currentCategories.length;i++) {
 			pos += 100;
-			let category = new InteractiveButton(currentCategories[i],219,pos,1130,200,i%4);
+			let category = new InteractiveButton(currentCategories[i],269,pos,1080,150,i%4);
 			category.getCategoryLabel().style("rotate",0);
 			menu4.push(category);
 		}
 	} else {
-		categoryLabel = new InteractiveBigText(269,pos,1080,60,"<span style='font-size:48px;font-transform:'>Nenhum resultado em Categorias</span>","");
+		categoryLabel = new InteractiveBigText(269,pos,1080,60,"Nenhum resultado em Categorias","");
 	}
+	categoryLabel.setBaseFontSize(48);
 	menu4.push(categoryLabel);
 	menu4.push(searchLabel);
 
 	pos += 400;
 	changeMenu(3,menu4);
-	appbackground.getBackground().size(1349,max(pos,100+allCategories.length*100));
-	appbackground.getCoverImage().size(0,0);
+	appbackground.size(innerWidth,max(pos,100+allCategories.length*100));
 	displayMenu(currentMenu);
 }
 
@@ -617,7 +645,8 @@ function startReader(zine, x, y, largura, altura) {
 function readZine() {
 	let menu5 = [];
 	let zine = allZines[detailedZine.getCoverImage().zineID];
-	let leitorLabel = new InteractiveBigText(269,60,1080,60,"<span style='font-size:64px;'>"+zine.getName()+"</span>","");
+	let leitorLabel = new InteractiveBigText(269,60,1080,60,zine.getName(),"");
+	leitorLabel.setBaseFontSize(64);
 
 	if (reader) {
 		reader.remove();
@@ -627,8 +656,7 @@ function readZine() {
 	menu5.push(reader);
 
 	changeMenu(4,menu5);
-	appbackground.getBackground().size(1349,980);
-	appbackground.getCoverImage().size(0,0);
+	appbackground.size(innerWidth,980);
 	displayMenu(currentMenu);
 }
 
@@ -661,15 +689,16 @@ function setup() {
 	interfaceElements = [];
 	categoriesSidebar = [];
 
-	appbackground = new InteractiveDisplay("Assets/background-app.png","",0,0,1349,1720);
-	appbackground.getCoverImage().style("margin-top","0px");
-	appbackground.getBackground().position(0,0);
+	appbackground = createImg("Assets/background-app.png");
+	appbackground.style("margin-top","0px");
+	appbackground.position(0,0);
+	appbackground.size(1349,1720)
 
 	let categoryLabel = new InteractiveBigText(0,50,280,50,"Categorias","");
-	categoryLabel.getContent().style("font-size","32px");
+	categoryLabel.setBaseFontSize(32);
 	categoriesSidebar.push(categoryLabel);
 	for(i=0;i<allCategories.length;i++) {
-		let buttonCategory = new InteractiveButton(allCategories[i],-20,100+i*100,300,150,i%4)
+		let buttonCategory = new InteractiveButton(allCategories[i],-20,100+i*100,300,150,i%4);
 		buttonCategory.getCategoryLabel().style("background-position","-600px 0px");
 		buttonCategory.getCategoryLabel().style("rotate",10);
 		categoriesSidebar.push(buttonCategory);

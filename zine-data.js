@@ -67,7 +67,7 @@ class Zine {
 
 	removeCategory(index) {
 		if (index < 0 || index >= this.categories.length)
-		this.categories.splice(index,1);
+			this.categories.splice(index,1);
 	}
 
 	getCategory(index) {
@@ -97,7 +97,7 @@ temp.addCategory("Entreterimento");
 temp.addCategory("Cultura");
 allZines.push(temp);
 
-temp = new Zine("escafandro.png","Retro Games Brasil",46,"Falmouthed Illustrators #2","Leo Gank","Na mais nova edição, destacamos novos artistas que têm como principal característica o humor negro");
+temp = new Zine("escafandro.png","Retro Games Brasil",45,"Falmouthed Illustrators #2","Leo Gank","Na mais nova edição, destacamos novos artistas que têm como principal característica o humor negro");
 temp.addCategory("Entreterimento");
 allZines.push(temp);
 
@@ -105,7 +105,7 @@ temp = new Zine("cidade.png","Ação Games",57,"All Things Ordinary","Karter Joh
 temp.addCategory("Entreterimento");
 allZines.push(temp);
 
-temp = new Zine("science.png","Retro Games Brasil",46,"She Blinded Me With Science","Pietro Jack","Autobiografia sobre como o autor encontrou suas duas paixões: a tecnologia e sua paixão");
+temp = new Zine("science.png","Retro Games Brasil",45,"She Blinded Me With Science","Pietro Jack","Autobiografia sobre como o autor encontrou suas duas paixões: a tecnologia e sua paixão");
 temp.addCategory("Tecnologia");
 temp.addCategory("Entreterimento");
 allZines.push(temp);
@@ -116,7 +116,7 @@ temp.addCategory("Entreterimento");
 temp.addCategory("Jogos");
 allZines.push(temp);
 
-temp = new Zine("rpg.jpg","Retro Games Brasil",46,"Retro Games Brasil","retrogamesbrasil.com","Confira tudo sobre os RPGs antigos de maior sucesso e nossas reviews sobre cada uma deles");
+temp = new Zine("rpg.jpg","Retro Games Brasil",45,"Retro Games Brasil","retrogamesbrasil.com","Confira tudo sobre os RPGs antigos de maior sucesso e nossas reviews sobre cada uma deles");
 temp.addCategory("Tecnologia");
 temp.addCategory("Entreterimento");
 temp.addCategory("Jogos");
