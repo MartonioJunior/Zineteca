@@ -742,6 +742,7 @@ function changeMenu(menuID, newElements) {
 
 function resizeBackgroundAndFooter() {
 	appbackground.size(widthReference,max(screenHeight/widthReference*innerWidth,innerHeight));
+	appbackground.style("background-size",widthReference+"px "+max(screenHeight/widthReference*innerWidth,innerHeight)+"px");
 	footer.position(0,(screenHeight-480)/widthReference*innerWidth);
 	footer.size(innerWidth,480/widthReference*innerWidth);
 }
